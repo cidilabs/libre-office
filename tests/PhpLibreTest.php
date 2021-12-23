@@ -13,17 +13,17 @@ class PhpLibreTest extends TestCase {
     public function testConversion() {
         $libre = new PhpLibre();
         $fileUrl = "https://cidilabs.instructure.com/files/295964/download?download_frd=1&verifier=RZwKCP3iVlNQIULZnTAXO0usUROMC9AuplKkDf2g";
-        $fileData = array('fileType' => 'pdf', 'fileName' => 'Amazon.com+-+Order+114-0218739-7877857.pdf');
+        $options = array('fileUrl' => $fileUrl, 'fileType' => 'pdf', 'format' => 'html', 'fileName' => 'Amazon.com+-+Order+114-0218739-7877857.pdf');
 
-        $this->assertEquals(true, !is_null($libre->convertFile($fileUrl, $fileData, 'html')));
+        $this->assertEquals(true, !is_null($libre->convertFile($options)));
     }
 
     public function testCheckIsReadyTrue() {
         $libre = new PhpLibre();
         $fileUrl = "https://cidilabs.instructure.com/files/295964/download?download_frd=1&verifier=RZwKCP3iVlNQIULZnTAXO0usUROMC9AuplKkDf2g";
-        $fileData = array('fileType' => 'pdf', 'fileName' => 'Amazon.com+-+Order+114-0218739-7877857.pdf');
+        $options = array('fileUrl' => $fileUrl, 'fileType' => 'pdf', 'format' => 'html', 'fileName' => 'Amazon.com+-+Order+114-0218739-7877857.pdf');
 
-        $taskId = $libre->convertFile($fileUrl, $fileData, 'html');
+        $taskId = $libre->convertFile($options);
         print($libre->getFileUrl($taskId));
 
         $this->assertEquals(true, $libre->isReady($taskId));

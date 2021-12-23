@@ -16,9 +16,11 @@ class PhpLibre {
         $this->bin = $bin;
     }
 
-    public function convertFile($fileUrl, $fileData, $format) {
-        $extension = $fileData['fileType'];
-        $fileName = $fileData['fileName'];
+    public function convertFile($options) {
+        $fileUrl = $options['fileUrl'];
+        $extension = $options['fileType'];
+        $fileName = $options['fileName'];
+        $format = $options['format'];
         $taskId = Uuid::uuid4();
         $newFilename = $taskId->toString() . '.' . $format;
         $supportedExtensions = $this->getAllowedConverter($extension);
@@ -196,14 +198,6 @@ class PhpLibre {
      */
     private function exec($cmd, $input = '')
     {
-        // Cannot use $_SERVER superglobal since that's empty during UnitUnishTestCase
-        // getenv('HOME') isn't set on Windows and generates a Notice.
-        // if ($this->prefixExecWithExportHome) {
-        //     $home = getenv('HOME');
-        //     if (!is_writable($home)) {
-        //         $cmd = 'export HOME=/tmp && '.$cmd;
-        //     }
-        // }
         $process = proc_open($cmd, [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
 
         if (false === $process) {
