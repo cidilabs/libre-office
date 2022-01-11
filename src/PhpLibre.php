@@ -21,8 +21,8 @@ class PhpLibre {
         $extension = $options['fileType'];
         $fileName = $options['fileName'];
         $format = $options['format'];
-        $taskId = Uuid::uuid4();
-        $newFilename = $taskId->toString() . '.' . $format;
+        $taskId = Uuid::uuid4()->toString();
+        $newFilename = $taskId . '.' . $format;
         $supportedExtensions = $this->getAllowedConverter($extension);
 
         //Check for valid input file extension
