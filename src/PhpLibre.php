@@ -71,12 +71,16 @@ class PhpLibre {
         return null;
     }
 
-    public function downloadFile($fileUrl) {
-
-    }
-
     public function deleteFile($fileUrl) {
+        $file = realpath($fileUrl);
 
+        if (file_exists($fileUrl)) {
+            unlink($fileUrl);
+            return true;
+        } else {
+            print("File not found");
+            return false;
+        }
     }
 
     /**
