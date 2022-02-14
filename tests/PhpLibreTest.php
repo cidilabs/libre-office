@@ -4,6 +4,7 @@ use CidiLabs\PhpLibre\PhpLibre;
 use PHPUnit\Framework\TestCase;
 
 class PhpLibreTest extends TestCase {
+
     public function testInit() {
         $libre = new PhpLibre();
 
@@ -12,21 +13,45 @@ class PhpLibreTest extends TestCase {
 
     public function testConversion() {
         $libre = new PhpLibre();
-        $fileUrl = "https://cidilabs.instructure.com/files/295964/download?download_frd=1&verifier=RZwKCP3iVlNQIULZnTAXO0usUROMC9AuplKkDf2g";
-        $options = array('fileUrl' => $fileUrl, 'fileType' => 'pdf', 'format' => 'html', 'fileName' => 'Amazon.com+-+Order+114-0218739-7877857.pdf');
+        $fileUrl = "test.pdf";
+        $options = array('fileUrl' => $fileUrl, 'fileType' => 'pdf', 'format' => 'html', 'fileName' => 'test.pdf');
 
-        $this->assertEquals(true, !is_null($libre->convertFile($options)));
+        $taskId = $libre->convertFile($options);
+
+        $this->assertEquals(true, !is_null($taskId));
+
+        while (!$libre->isReady($taskId)) {
+            print("Waiting on file to finish converting");
+        }
+
+        $convertedUrl = $libre->getFileUrl($taskId);
+        $this->assertEquals(true, $libre->deleteFile($convertedUrl));
     }
+
+    // public function testConversionImageOnlyPdf() {
+    //     $libre = new PhpLibre();
+    //     $fileUrl = "image-based-pdf-sample.pdf";
+    //     $options = array('fileUrl' => $fileUrl, 'fileType' => 'pdf', 'format' => 'html', 'fileName' => 'image-based-pdf-sample.pdf');
+
+    //     $taskId = $libre->convertFile($options);
+    //     $this->assertEquals(true, true);
+    // }
 
     public function testCheckIsReadyTrue() {
         $libre = new PhpLibre();
-        $fileUrl = "https://cidilabs.instructure.com/files/295964/download?download_frd=1&verifier=RZwKCP3iVlNQIULZnTAXO0usUROMC9AuplKkDf2g";
-        $options = array('fileUrl' => $fileUrl, 'fileType' => 'pdf', 'format' => 'html', 'fileName' => 'Amazon.com+-+Order+114-0218739-7877857.pdf');
+        $fileUrl = "test.pdf";
+        $options = array('fileUrl' => $fileUrl, 'fileType' => 'pdf', 'format' => 'html', 'fileName' => 'test.pdf');
 
         $taskId = $libre->convertFile($options);
-        print($libre->getFileUrl($taskId));
+
+        while (!$libre->isReady($taskId)) {
+            print("Waiting on file to finish converting");
+        }
 
         $this->assertEquals(true, $libre->isReady($taskId));
+
+        $convertedUrl = $libre->getFileUrl($taskId);
+        $this->assertEquals(true, $libre->deleteFile($convertedUrl));
     }
 
     public function testCheckIsReadyFalse() {
@@ -34,5 +59,19 @@ class PhpLibreTest extends TestCase {
         $taskId = 'fakeTaskId';
 
         $this->assertEquals(false, $libre->isReady($taskId));
+    }
+
+    public function testCheckGetFileUrlFalse() {
+        $libre = new PhpLibre();
+        $taskId = 'fakeTaskId';
+
+        $this->assertEquals(true, is_null($libre->getFileUrl($taskId)));
+    }
+
+    public function testDeleteFileFalse() {
+        $libre = new PhpLibre();
+        $fileUrl = 'fakeFileUrl';
+
+        $this->assertEquals(false, $libre->deleteFile($fileUrl));
     }
 }
