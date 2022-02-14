@@ -1,5 +1,5 @@
 {
-    "name": "cidilabs/libre-office",
+    "name": "cidilabs/phplibre",
     "type": "library",
     "description": "Libre Office Library for PHP",
     "license": "MIT",
