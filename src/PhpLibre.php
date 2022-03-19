@@ -6,17 +6,24 @@ use DOMDocument;
 use DOMXPath;
 use Ramsey\Uuid\Uuid;
 
-class PhpLibre {
+class PhpLibre
+{
 
     private $bin;
 
+    // extensions and filters for LibreOffice
+    // https://help.libreoffice.org/latest/en-US/text/shared/guide/convertfilters.html
+    private $extensionFilters = [
+        'html' => "html:XHTML Writer File",
+    ];
 
     public function __construct($bin = 'soffice')
     {
         $this->bin = $bin;
     }
 
-    public function convertFile($options) {
+    public function convertFile($options)
+    {
         $fileUrl = $options['fileUrl'];
         $extension = $options['fileType'];
         $fileName = $options['fileName'];
@@ -27,7 +34,7 @@ class PhpLibre {
 
         //Check for valid input file extension
         if (!array_key_exists($extension, $this->getAllowedConverter())) {
-            echo ('Input file extension not supported -- '.$extension);
+            echo ('Input file extension not supported -- ' . $extension);
             return null;
         }
 
@@ -43,10 +50,9 @@ class PhpLibre {
 
         $shell = $this->exec($this->makeCommand($format, $fileName));
         if (0 != $shell['return']) {
-            echo ('Convertion Failure! Contact Server Admin.');
+            echo ('Conversion Failure! Contact Server Admin. Error: ' . $shell['return']);
             return null;
         }
-
 
         $outdir = getcwd();
         $basename = pathinfo($fileName, PATHINFO_BASENAME);
@@ -55,14 +61,16 @@ class PhpLibre {
         return $taskId;
     }
 
-    public function isReady($taskId) {
-        $result = glob ($taskId . '.*');
+    public function isReady($taskId)
+    {
+        $result = glob($taskId . '.*');
 
         return (!empty($result));
     }
 
-    public function getFileUrl($taskId) {
-        $result = glob ($taskId . '.*');
+    public function getFileUrl($taskId)
+    {
+        $result = glob($taskId . '.*');
 
         if (!empty($result)) {
             return ($result[0]);
@@ -71,7 +79,8 @@ class PhpLibre {
         return null;
     }
 
-    public function deleteFile($fileUrl) {
+    public function deleteFile($fileUrl)
+    {
         $file = realpath($fileUrl);
 
         if (file_exists($fileUrl)) {
@@ -84,26 +93,28 @@ class PhpLibre {
     }
 
     /**
-    * Helpers
-    **/
+     * Helpers
+     **/
 
-    
+
     protected function makeCommand($outputExtension, $filename)
     {
         $oriFile = escapeshellarg($filename);
 
-        return "{$this->bin} --headless --convert-to {$outputExtension} {$oriFile}";
+        $outputExtension = !empty($this->extensionFilters[$outputExtension]) ? $this->extensionFilters[$outputExtension] : $outputExtension;
+
+        return "{$this->bin} --headless --convert-to \"{$outputExtension}\" {$oriFile}";
     }
 
-    
+
     protected function prepOutput($basename, $inputExtension, $outdir, $filename, $outputExtension)
     {
         $DS = DIRECTORY_SEPARATOR;
-        $tmpName = ($inputExtension ? basename($basename, $inputExtension) : $basename . '.').$outputExtension;
-        if (rename($outdir.$DS.$tmpName, $outdir.$DS.$filename)) {
-            return $outdir.$DS.$filename;
-        } elseif (is_file($outdir.$DS.$tmpName)) {
-            return $outdir.$DS.$tmpName;
+        $tmpName = ($inputExtension ? basename($basename, $inputExtension) : $basename) . '.' . $outputExtension;
+        if (rename($outdir . $DS . $tmpName, $outdir . $DS . $filename)) {
+            return $outdir . $DS . $filename;
+        } elseif (is_file($outdir . $DS . $tmpName)) {
+            return $outdir . $DS . $tmpName;
         }
 
         return null;
@@ -112,14 +123,14 @@ class PhpLibre {
     protected function open($filename)
     {
         if (!file_exists($filename) || false === realpath($filename)) {
-            print('File does not exist --'.$filename);
+            print('File does not exist --' . $filename);
             return false;
         }
 
         return true;
     }
 
-    
+
     private function getAllowedConverter($extension = null)
     {
         $allowedConverter = [
