@@ -30,7 +30,7 @@ class PhpLibre
         $extension = $options['fileType'];
         $fileName = $options['fileName'];
         $format = $options['format'];
-        $directory = $options['dirname'];
+        $directory = isset($options['dirname']) ? $options['dirname'] : $this->outputDir;
         $taskId = Uuid::uuid4()->toString();
         $newFilename = $taskId . '.' . $format;
         $supportedExtensions = $this->getAllowedConverter($extension);
@@ -70,14 +70,16 @@ class PhpLibre
 
     public function isReady($options)
     {
-        $result = glob($options['dirname'] . '/' . $options['taskId'] . '.*');
+        $dirname = isset($options['dirname']) ? $options['dirname'] : $this->outputDir;
+        $result = glob($dirname . '/' . $options['taskId'] . '.*');
 
         return (!empty($result));
     }
 
     public function getFileUrl($options)
     {
-        $result = glob($options['dirname'] . '/' . $options['taskId'] . '.*');
+        $dirname = isset($options['dirname']) ? $options['dirname'] : $this->outputDir;
+        $result = glob($dirname . '/' . $options['taskId'] . '.*');
 
         if (!empty($result)) {
             return ($result[0]);
