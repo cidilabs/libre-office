@@ -20,6 +20,8 @@ class PhpLibre
     public function __construct($bin = 'soffice')
     {
         $this->bin = $bin;
+        // In case we decide not to make it configurable
+        $this->outputDir = 'alternates';
     }
 
     public function convertFile($options)
@@ -28,6 +30,7 @@ class PhpLibre
         $extension = $options['fileType'];
         $fileName = $options['fileName'];
         $format = $options['format'];
+        $directory = isset($options['dirname']) ? $options['dirname'] : $this->outputDir;
         $taskId = Uuid::uuid4()->toString();
         $newFilename = $taskId . '.' . $format;
         $supportedExtensions = $this->getAllowedConverter($extension);
@@ -48,29 +51,35 @@ class PhpLibre
             return null;
         }
 
-        $shell = $this->exec($this->makeCommand($format, $fileName));
+        if (!is_dir($directory)) {
+            mkdir($directory);
+        }
+
+        $shell = $this->exec($this->makeCommand($format, $fileName, $directory));
         if (0 != $shell['return']) {
             echo ('Conversion Failure! Contact Server Admin. Error: ' . $shell['return']);
             return null;
         }
 
-        $outdir = getcwd();
+        $outdir = $directory;
         $basename = pathinfo($fileName, PATHINFO_BASENAME);
         $this->prepOutput($basename, $extension, $outdir, $newFilename, $format);
 
         return $taskId;
     }
 
-    public function isReady($taskId)
+    public function isReady($options)
     {
-        $result = glob($taskId . '.*');
+        $dirname = isset($options['dirname']) ? $options['dirname'] : $this->outputDir;
+        $result = glob($dirname . '/' . $options['taskId'] . '.*');
 
         return (!empty($result));
     }
 
-    public function getFileUrl($taskId)
+    public function getFileUrl($options)
     {
-        $result = glob($taskId . '.*');
+        $dirname = isset($options['dirname']) ? $options['dirname'] : $this->outputDir;
+        $result = glob($dirname . '/' . $options['taskId'] . '.*');
 
         if (!empty($result)) {
             return ($result[0]);
@@ -81,8 +90,6 @@ class PhpLibre
 
     public function deleteFile($fileUrl)
     {
-        $file = realpath($fileUrl);
-
         if (file_exists($fileUrl)) {
             unlink($fileUrl);
             return true;
@@ -97,24 +104,24 @@ class PhpLibre
      **/
 
 
-    protected function makeCommand($outputExtension, $filename)
+    protected function makeCommand($outputExtension, $filename, $dirname)
     {
         $oriFile = escapeshellarg($filename);
 
         $outputExtension = !empty($this->extensionFilters[$outputExtension]) ? $this->extensionFilters[$outputExtension] : $outputExtension;
 
-        return "{$this->bin} --headless --convert-to \"{$outputExtension}\" {$oriFile}";
+        return "{$this->bin} --headless --convert-to \"{$outputExtension}\" {$oriFile} --outdir {$dirname}";
     }
 
 
     protected function prepOutput($basename, $inputExtension, $outdir, $filename, $outputExtension)
     {
         $DS = DIRECTORY_SEPARATOR;
-        $tmpName = ($inputExtension ? basename($basename, $inputExtension) : $basename) . '.' . $outputExtension;
-        if (rename($outdir . $DS . $tmpName, $outdir . $DS . $filename)) {
-            return $outdir . $DS . $filename;
-        } elseif (is_file($outdir . $DS . $tmpName)) {
-            return $outdir . $DS . $tmpName;
+        $tmpName = ($inputExtension ? basename($basename, $inputExtension) : $basename . '.').$outputExtension;
+        if (rename($outdir.$DS.$tmpName, $outdir.$DS.$filename)) {
+            return $outdir.$DS.$filename;
+        } elseif (is_file($outdir.$DS.$tmpName)) {
+            return $outdir.$DS.$tmpName;
         }
 
         return null;
