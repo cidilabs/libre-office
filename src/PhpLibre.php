@@ -39,7 +39,6 @@ class PhpLibre
         $extension = $options['fileType'];
         $fileName = $options['fileName'];
         $format = $options['format'];
-        $directory = $this->outputDir;
         $taskId = Uuid::uuid4()->toString();
         $newFilename = $taskId . '.' . $format;
         $supportedExtensions = $this->getAllowedConverter($extension);
@@ -61,18 +60,18 @@ class PhpLibre
             return $this->responseObject;
         }
 
-        if (!is_dir($directory)) {
-            mkdir($directory);
+        if (!is_dir($this->outputDir)) {
+            mkdir($this->outputDir);
         }
 
-        $shell = $this->exec($this->makeCommand($format, $fileName, $directory));
+        $shell = $this->exec($this->makeCommand($format, $fileName));
         if (0 != $shell['return']) {
             $this->responseObject['errors'][] = "Conversion Failure! Contact Server Admin. Error: " . $shell['return'];
             return $this->responseObject;
         }
 
         $basename = pathinfo($fileName, PATHINFO_BASENAME);
-        $this->prepOutput($basename, $extension, $directory, $newFilename, $format);
+        $this->prepOutput($basename, $extension, $newFilename, $format);
 
         $this->responseObject['taskId'] = $taskId;
         return $this->responseObject;
@@ -118,9 +117,10 @@ class PhpLibre
      **/
 
 
-    protected function makeCommand($outputExtension, $filename, $dirname)
+    protected function makeCommand($outputExtension, $filename)
     {
         $oriFile = escapeshellarg($filename);
+        $dirname = $this->outputDir;
 
         $outputExtension = !empty($this->extensionFilters[$outputExtension]) ? $this->extensionFilters[$outputExtension] : $outputExtension;
 
@@ -128,9 +128,10 @@ class PhpLibre
     }
 
 
-    protected function prepOutput($basename, $inputExtension, $outdir, $filename, $outputExtension)
+    protected function prepOutput($basename, $inputExtension, $filename, $outputExtension)
     {
         $DS = DIRECTORY_SEPARATOR;
+        $outdir = $this->outputDir;
         $tmpName = ($inputExtension ? basename($basename, $inputExtension) : $basename . '.').$outputExtension;
         if (rename($outdir.$DS.$tmpName, $outdir.$DS.$filename)) {
             return $outdir.$DS.$filename;
