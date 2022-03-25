@@ -27,10 +27,10 @@ class PhpLibre
         'errors' => []
     ];
 
-    public function __construct($bin = 'soffice')
+    public function __construct($bin = 'soffice', $outputDir = 'alternates')
     {
         $this->bin = $bin;
-        $this->outputDir = 'alternates';
+        $this->outputDir = $outputDir;
     }
 
     public function convertFile($options)
