@@ -71,9 +71,8 @@ class PhpLibre
             return $this->responseObject;
         }
 
-        $outdir = $directory;
         $basename = pathinfo($fileName, PATHINFO_BASENAME);
-        $this->prepOutput($basename, $extension, $outdir, $newFilename, $format);
+        $this->prepOutput($basename, $extension, $directory, $newFilename, $format);
 
         $this->responseObject['taskId'] = $taskId;
         return $this->responseObject;
