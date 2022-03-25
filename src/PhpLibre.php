@@ -11,7 +11,7 @@ class PhpLibre
 
     private $bin;
 
-    private $outdir;
+    private $outputDir;
 
     // extensions and filters for LibreOffice
     // https://help.libreoffice.org/latest/en-US/text/shared/guide/convertfilters.html
@@ -30,7 +30,6 @@ class PhpLibre
     public function __construct($bin = 'soffice')
     {
         $this->bin = $bin;
-        // In case we decide not to make it configurable
         $this->outputDir = 'alternates';
     }
 
@@ -40,7 +39,7 @@ class PhpLibre
         $extension = $options['fileType'];
         $fileName = $options['fileName'];
         $format = $options['format'];
-        $directory = isset($options['dirname']) ? $options['dirname'] : $this->outputDir;
+        $directory = $this->outputDir;
         $taskId = Uuid::uuid4()->toString();
         $newFilename = $taskId . '.' . $format;
         $supportedExtensions = $this->getAllowedConverter($extension);
