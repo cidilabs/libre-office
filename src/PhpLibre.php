@@ -11,10 +11,20 @@ class PhpLibre
 
     private $bin;
 
+    private $outdir;
+
     // extensions and filters for LibreOffice
     // https://help.libreoffice.org/latest/en-US/text/shared/guide/convertfilters.html
     private $extensionFilters = [
         'html' => "html:XHTML Writer File",
+    ];
+
+    // Response object that gets returned to Udoit
+    private $responseObject = [
+        'taskId' => '',
+        'data' => [],
+        'status' => '',
+        'errors' => []
     ];
 
     public function __construct($bin = 'soffice')
@@ -37,18 +47,19 @@ class PhpLibre
 
         //Check for valid input file extension
         if (!array_key_exists($extension, $this->getAllowedConverter())) {
-            echo ('Input file extension not supported -- ' . $extension);
-            return null;
+            $this->responseObject['errors'][] = "Input file extension not supported -- " . $extension;
         }
 
         if (!in_array($format, $supportedExtensions)) {
-            echo ("Output extension({$format}) not supported for input file({$fileUrl})");
-            return null;
+            $this->responseObject['errors'][] = "Output extension({$format}) not supported for input file({$fileUrl})";
         }
 
         if (!file_put_contents($fileName, file_get_contents($fileUrl))) {
-            echo ("File downloading failed.");
-            return null;
+            $this->responseObject['errors'][] = "File downloading failed.";
+        }
+
+        if (!empty($this->responseObject['errors'])) {
+            return $this->responseObject;
         }
 
         if (!is_dir($directory)) {
@@ -57,46 +68,51 @@ class PhpLibre
 
         $shell = $this->exec($this->makeCommand($format, $fileName, $directory));
         if (0 != $shell['return']) {
-            echo ('Conversion Failure! Contact Server Admin. Error: ' . $shell['return']);
-            return null;
+            $this->responseObject['errors'][] = "Conversion Failure! Contact Server Admin. Error: " . $shell['return'];
+            return $this->responseObject;
         }
 
         $outdir = $directory;
         $basename = pathinfo($fileName, PATHINFO_BASENAME);
         $this->prepOutput($basename, $extension, $outdir, $newFilename, $format);
 
-        return $taskId;
+        $this->responseObject['taskId'] = $taskId;
+        return $this->responseObject;
     }
 
-    public function isReady($options)
+    public function isReady($taskId)
     {
-        $dirname = isset($options['dirname']) ? $options['dirname'] : $this->outputDir;
-        $result = glob($dirname . '/' . $options['taskId'] . '.*');
+        $dirname = $this->outputDir;
+        $result = glob($dirname . '/' . $taskId . '.*');
 
-        return (!empty($result));
+        $this->responseObject['status'] = (!empty($result));
+
+        return $this->responseObject;
     }
 
-    public function getFileUrl($options)
+    public function getFileUrl($taskId)
     {
-        $dirname = isset($options['dirname']) ? $options['dirname'] : $this->outputDir;
-        $result = glob($dirname . '/' . $options['taskId'] . '.*');
+        $dirname = $this->outputDir;
+        $result = glob($dirname . '/' . $taskId . '.*');
 
         if (!empty($result)) {
-            return ($result[0]);
+            $this->responseObject['data'][] = $result[0];
+        } else {
+            $this->responseObject['errors'][] = "No file found for taskId: " . $taskId;
         }
 
-        return null;
+        return $this->responseObject;
     }
 
     public function deleteFile($fileUrl)
     {
         if (file_exists($fileUrl)) {
             unlink($fileUrl);
-            return true;
         } else {
-            print("File not found");
-            return false;
+            $this->responseObject['errors'][] = "File not found";
         }
+
+        return $this->responseObject;
     }
 
     /**

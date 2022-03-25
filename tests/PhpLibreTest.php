@@ -14,69 +14,53 @@ class PhpLibreTest extends TestCase {
     public function testConversion() {
         $libre = new PhpLibre();
         $fileUrl = "test.pdf";
-        $options = array('fileUrl' => $fileUrl, 'fileType' => 'pdf', 'format' => 'html', 'fileName' => 'test.pdf', 'dirname' => 'alternates');
+        $options = array('fileUrl' => $fileUrl, 'fileType' => 'pdf', 'format' => 'html', 'fileName' => 'test.pdf');
 
-        $taskId = $libre->convertFile($options);
+        $taskId = $libre->convertFile($options)['taskId'];
 
-        $this->assertEquals(true, !is_null($taskId));
-
-        $options = ['taskId' => $taskId, 'dirname' => 'alternates'];
-
-        while (!$libre->isReady($options)) {
+        while (!$libre->isReady($taskId)['status']) {
             print("Waiting on file to finish converting");
         }
 
-        $convertedUrl = $libre->getFileUrl($options);
+        $convertedUrl = $libre->getFileUrl($taskId)['data'][0];
 
-        $this->assertEquals(true, $libre->deleteFile($convertedUrl));
+        $this->assertEquals(true, empty($libre->deleteFile($convertedUrl)['errors']));
     }
 
     public function testCheckIsReadyTrue() {
         $libre = new PhpLibre();
         $fileUrl = "test.pdf";
-        $options = array('fileUrl' => $fileUrl, 'fileType' => 'pdf', 'format' => 'html', 'fileName' => 'test.pdf', 'dirname' => 'alternates');
+        $options = array('fileUrl' => $fileUrl, 'fileType' => 'pdf', 'format' => 'html', 'fileName' => 'test.pdf');
 
-        $taskId = $libre->convertFile($options);
+        $taskId = $libre->convertFile($options)['taskId'];
 
-        $this->assertEquals(true, !is_null($taskId));
-
-        $options = ['taskId' => $taskId, 'dirname' => 'alternates'];
-
-        while (!$libre->isReady($options)) {
+        while (!$libre->isReady($taskId)['status']) {
             print("Waiting on file to finish converting");
         }
 
-        $this->assertEquals(true, $libre->isReady($options));
+        $convertedUrl = $libre->getFileUrl($taskId)['data'][0];
 
-        $convertedUrl = $libre->getFileUrl($options);
-
-        $this->assertEquals(true, $libre->deleteFile($convertedUrl));
+        $this->assertEquals(true, empty($libre->deleteFile($convertedUrl)['errors']));
     }
 
     public function testCheckIsReadyFalse() {
         $libre = new PhpLibre();
         $taskId = 'fakeTaskId';
-        $dirname = 'test';
 
-        $options = ['taskId' => $taskId, 'dirname' => 'alternates'];
-
-        $this->assertEquals(false, $libre->isReady($options));
+        $this->assertEquals(false, $libre->isReady($taskId)['status']);
     }
 
     public function testCheckGetFileUrlFalse() {
         $libre = new PhpLibre();
         $taskId = 'fakeTaskId';
-        $dirname = 'test';
 
-        $options = ['taskId' => $taskId, 'dirname' => 'alternates'];
-
-        $this->assertEquals(true, is_null($libre->getFileUrl($options)));
+        $this->assertEquals(false, empty($libre->getFileUrl($taskId)['errors']));
     }
 
     public function testDeleteFileFalse() {
         $libre = new PhpLibre();
         $convertedUrl = 'fakeUrl';
 
-        $this->assertEquals(false, $libre->deleteFile($convertedUrl));
+        $this->assertEquals(false, empty($libre->deleteFile($convertedUrl)['errors']));
     }
 }
