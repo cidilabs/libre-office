@@ -16,13 +16,13 @@ class PhpLibreTest extends TestCase {
         $fileUrl = "test.pdf";
         $options = array('fileUrl' => $fileUrl, 'fileType' => 'pdf', 'format' => 'html', 'fileName' => 'test.pdf');
 
-        $taskId = $libre->convertFile($options)['taskId'];
+        $taskId = $libre->convertFile($options)['data']['taskId'];
 
-        while (!$libre->isReady($taskId)['status']) {
+        while (!$libre->isReady($taskId)['data']['status']) {
             print("Waiting on file to finish converting");
         }
 
-        $convertedUrl = $libre->getFileUrl($taskId)['data'][0];
+        $convertedUrl = $libre->getFileUrl($taskId)['data']['filepath'];
 
         $this->assertEquals(true, empty($libre->deleteFile($convertedUrl)['errors']));
     }
@@ -32,13 +32,13 @@ class PhpLibreTest extends TestCase {
         $fileUrl = "test.pdf";
         $options = array('fileUrl' => $fileUrl, 'fileType' => 'pdf', 'format' => 'html', 'fileName' => 'test.pdf');
 
-        $taskId = $libre->convertFile($options)['taskId'];
+        $taskId = $libre->convertFile($options)['data']['taskId'];
 
-        while (!$libre->isReady($taskId)['status']) {
+        while (!$libre->isReady($taskId)['data']['status']) {
             print("Waiting on file to finish converting");
         }
 
-        $convertedUrl = $libre->getFileUrl($taskId)['data'][0];
+        $convertedUrl = $libre->getFileUrl($taskId)['data']['filepath'];
 
         $this->assertEquals(true, empty($libre->deleteFile($convertedUrl)['errors']));
     }
@@ -47,7 +47,7 @@ class PhpLibreTest extends TestCase {
         $libre = new PhpLibre();
         $taskId = 'fakeTaskId';
 
-        $this->assertEquals(false, $libre->isReady($taskId)['status']);
+        $this->assertEquals(false, $libre->isReady($taskId)['data']['status']);
     }
 
     public function testCheckGetFileUrlFalse() {

@@ -21,9 +21,12 @@ class PhpLibre
 
     // Response object that gets returned to Udoit
     private $responseObject = [
-        'taskId' => '',
-        'data' => [],
-        'status' => '',
+        'data' => [
+            'taskId' => '',
+            'filePath' => '',
+            'relatedFiles' => [],
+            'status' => ''
+        ],
         'errors' => []
     ];
 
@@ -73,7 +76,7 @@ class PhpLibre
         $basename = pathinfo($fileName, PATHINFO_BASENAME);
         $this->prepOutput($basename, $extension, $newFilename, $format);
 
-        $this->responseObject['taskId'] = $taskId;
+        $this->responseObject['data']['taskId'] = $taskId;
         return $this->responseObject;
     }
 
@@ -82,7 +85,7 @@ class PhpLibre
         $dirname = $this->outputDir;
         $result = glob($dirname . '/' . $taskId . '.*');
 
-        $this->responseObject['status'] = (!empty($result));
+        $this->responseObject['data']['status'] = (!empty($result));
 
         return $this->responseObject;
     }
@@ -93,7 +96,7 @@ class PhpLibre
         $result = glob($dirname . '/' . $taskId . '.*');
 
         if (!empty($result)) {
-            $this->responseObject['data'][] = $result[0];
+            $this->responseObject['data']['filepath'] = $result[0];
         } else {
             $this->responseObject['errors'][] = "No file found for taskId: " . $taskId;
         }
