@@ -96,7 +96,7 @@ class PhpLibre
         $result = glob($dirname . '/' . $taskId . '.*');
 
         if (!empty($result)) {
-            $this->responseObject['data']['filepath'] = $result[0];
+            $this->responseObject['data']['filePath'] = $result[0];
         } else {
             $this->responseObject['errors'][] = "No file found for taskId: " . $taskId;
         }
