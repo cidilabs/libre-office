@@ -70,6 +70,9 @@ class PhpLibre
         $image = file_get_contents("https://upload.wikimedia.org/wikipedia/commons/7/74/A-Cat.jpg");
         file_put_contents('alternates/image01.jpg', $image);
 
+        $image2 = file_get_contents("https://upload.wikimedia.org/wikipedia/commons/d/dc/Young_cats.jpg");
+        file_put_contents('alternates/image02.jpg', $image2);
+
         $shell = $this->exec($this->makeCommand($format, $fileName));
         if (0 != $shell['return']) {
             $this->responseObject['errors'][] = "Conversion Failure! Contact Server Admin. Error: " . $shell['return'];
@@ -81,6 +84,7 @@ class PhpLibre
 
         $this->responseObject['data']['taskId'] = $taskId;
         $this->responseObject['data']['relatedFiles'][] = 'alternates/image01.jpg';
+        $this->responseObject['data']['relatedFiles'][] = 'alternates/image02.jpg';
         return $this->responseObject;
     }
 
