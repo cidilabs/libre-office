@@ -22,7 +22,7 @@ class PhpLibreTest extends TestCase {
             print("Waiting on file to finish converting");
         }
 
-        $convertedUrl = $libre->getFileUrl($taskId)['data']['filepath'];
+        $convertedUrl = $libre->getFileUrl($taskId)['data']['filePath'];
 
         $this->assertEquals(true, empty($libre->deleteFile($convertedUrl)['errors']));
     }
@@ -38,7 +38,7 @@ class PhpLibreTest extends TestCase {
             print("Waiting on file to finish converting");
         }
 
-        $convertedUrl = $libre->getFileUrl($taskId)['data']['filepath'];
+        $convertedUrl = $libre->getFileUrl($taskId)['data']['filePath'];
 
         $this->assertEquals(true, empty($libre->deleteFile($convertedUrl)['errors']));
     }

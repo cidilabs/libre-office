@@ -67,6 +67,9 @@ class PhpLibre
             mkdir($this->outputDir);
         }
 
+        $image = file_get_contents("https://upload.wikimedia.org/wikipedia/commons/7/74/A-Cat.jpg");
+        file_put_contents('alternates/image01.jpg', $image);
+
         $shell = $this->exec($this->makeCommand($format, $fileName));
         if (0 != $shell['return']) {
             $this->responseObject['errors'][] = "Conversion Failure! Contact Server Admin. Error: " . $shell['return'];
@@ -77,6 +80,7 @@ class PhpLibre
         $this->prepOutput($basename, $extension, $newFilename, $format);
 
         $this->responseObject['data']['taskId'] = $taskId;
+        $this->responseObject['data']['relatedFiles'][] = 'alternates/image01.jpg';
         return $this->responseObject;
     }
 
