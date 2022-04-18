@@ -15,7 +15,6 @@ Once LibreOffice and the PhpLibre library are installed, you'll need to let UDOI
 This can be done:
 
 - In the .env: ```###> file formats ###
-# comma-separated list of file formats
 AVAILABLE_FILE_FORMATS="html,pdf"
 HTML_FILE_FORMAT_CLASS="\\CidiLabs\\PhpLibre\\PhpLibre"
 PDF_FILE_FORMAT_CLASS="\\CidiLabs\\PhpLibre\\PhpLibre"```
