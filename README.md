@@ -6,6 +6,23 @@ PhpLibre is an integration library for the file conversion functionality of Libr
 
 In order to use this library, you'll need LibreOffice installed. You can find it at the [Libre Office Website](https://www.libreoffice.org/download/download/) or you can install it through Homebrew with ```brew install --cask libreoffice```
 
+PhpLibre can be installed to your project via Composer by adding the following line to your composer.json file: 
+
+```"cidilabs/phplibre": "dev-master"```
+
+Once LibreOffice and the PhpLibre library are installed, you'll need to let UDOIT know which file conversion library you'll be using.
+
+This can be done:
+
+- In the .env: ```###> file formats ###
+# comma-separated list of file formats
+AVAILABLE_FILE_FORMATS="html,pdf"
+HTML_FILE_FORMAT_CLASS="\\CidiLabs\\PhpLibre\\PhpLibre"
+PDF_FILE_FORMAT_CLASS="\\CidiLabs\\PhpLibre\\PhpLibre"```
+
+Where ```AVAILABLE_FILE_FORMATS``` is the list of formats that files can be converted to, and for each of those formats there is a ```{FORMAT}_FILE_FORMAT_CLASS``` field that points to PhpLibre. 
+
+
 ## Basic Usage
 
 - **fileName**: The name of the file
