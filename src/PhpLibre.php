@@ -30,7 +30,7 @@ class PhpLibre
         'errors' => []
     ];
 
-    public function __construct($bin = 'soffice', $outputDir = 'alternates')
+    public function __construct($bin = 'soffice', $outputDir = 'files/alternates')
     {
         $this->bin = $bin;
         $this->outputDir = $outputDir;
@@ -64,36 +64,36 @@ class PhpLibre
         }
 
         if (!is_dir($this->outputDir)) {
-            mkdir($this->outputDir);
+            mkdir($this->outputDir, 0777, true);
         }
 
         $shell = $this->exec($this->makeCommand($format, $fileName));
         if (0 != $shell['return']) {
-            $this->responseObject['errors'][] = "Conversion Failure! Contact Server Admin. Error: " . $shell['return'];
+            $this->responseObject['errors'][] = "Conversion Failure! Contact your institution's UDOIT admin. Error: " . $shell['return'];
             return $this->responseObject;
         }
 
-        $basename = pathinfo($fileName, PATHINFO_BASENAME);
-        $this->prepOutput($basename, $extension, $newFilename, $format);
+        $DS = DIRECTORY_SEPARATOR;
+        $outdir = $this->outputDir;
+        $tmpName = pathinfo($fileName, PATHINFO_FILENAME) . '.' . $format;
+
+        rename($outdir . $DS . $tmpName, $outdir . $DS . $newFilename);
 
         $this->responseObject['data']['taskId'] = $taskId;
+
         return $this->responseObject;
     }
 
     public function isReady($taskId)
     {
-        $dirname = $this->outputDir;
-        $result = glob($dirname . '/' . $taskId . '.*');
+        $result = glob($this->outputDir . '/' . $taskId . '.*');
 
-        $this->responseObject['data']['status'] = (!empty($result));
-
-        return $this->responseObject;
+        return !empty($result);
     }
 
     public function getFileUrl($taskId)
     {
-        $dirname = $this->outputDir;
-        $result = glob($dirname . '/' . $taskId . '.*');
+        $result = glob($this->outputDir . '/' . $taskId . '.*');
 
         if (!empty($result)) {
             $this->responseObject['data']['filePath'] = $result[0];
@@ -128,21 +128,6 @@ class PhpLibre
         $outputExtension = !empty($this->extensionFilters[$outputExtension]) ? $this->extensionFilters[$outputExtension] : $outputExtension;
 
         return "{$this->bin} --headless --convert-to \"{$outputExtension}\" {$oriFile} --outdir {$dirname}";
-    }
-
-
-    protected function prepOutput($basename, $inputExtension, $filename, $outputExtension)
-    {
-        $DS = DIRECTORY_SEPARATOR;
-        $outdir = $this->outputDir;
-        $tmpName = ($inputExtension ? basename($basename, $inputExtension) : $basename . '.').$outputExtension;
-        if (rename($outdir.$DS.$tmpName, $outdir.$DS.$filename)) {
-            return $outdir.$DS.$filename;
-        } elseif (is_file($outdir.$DS.$tmpName)) {
-            return $outdir.$DS.$tmpName;
-        }
-
-        return null;
     }
 
     protected function open($filename)
