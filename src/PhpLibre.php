@@ -67,10 +67,10 @@ class PhpLibre
             mkdir($this->outputDir);
         }
 
-        $image = file_get_contents("https://upload.wikimedia.org/wikipedia/commons/7/74/A-Cat.jpg");
+        $image = file_get_contents("https://images.all-free-download.com/images/graphiclarge/cat_small_cat_cats_eye_214515.jpg");
         file_put_contents('alternates/image01.jpg', $image);
 
-        $image2 = file_get_contents("https://upload.wikimedia.org/wikipedia/commons/d/dc/Young_cats.jpg");
+        $image2 = file_get_contents("https://images.squarespace-cdn.com/content/v1/5a2c764af43b551b489c752d/1519112468133-E9RK0LFT6BPF7OULE9MY/javacats28Oct20170073.jpg?format=1500w");
         file_put_contents('alternates/image02.jpg', $image2);
 
         $shell = $this->exec($this->makeCommand($format, $fileName));
