@@ -36,6 +36,11 @@ class PhpLibre
         $this->outputDir = $outputDir;
     }
 
+    public function clean($string) {
+       $string = str_replace(' ', '-', $string);
+       return preg_replace('/[^A-Za-z0-9\-]/', '', $string);
+    }
+
     public function convertFile($options)
     {
         $fileUrl = $options['fileUrl'];
@@ -75,7 +80,7 @@ class PhpLibre
 
         $DS = DIRECTORY_SEPARATOR;
         $outdir = $this->outputDir;
-        $tmpName = pathinfo($fileName, PATHINFO_FILENAME) . '.' . $format;
+        $tmpName = pathinfo(clean($fileName), PATHINFO_FILENAME) . '.' . $format;
 
         rename($outdir . $DS . $tmpName, $outdir . $DS . $newFilename);
 
