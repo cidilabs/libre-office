@@ -18,11 +18,11 @@ class PhpLibreTest extends TestCase {
 
         $taskId = $libre->convertFile($options)['data']['taskId'];
 
-        while (!$libre->isReady($taskId)['data']['status']) {
+        while (!$libre->isReady($taskId)) {
             print("Waiting on file to finish converting");
         }
 
-        $convertedUrl = $libre->getFileUrl($taskId)['data']['filepath'];
+        $convertedUrl = $libre->getFileUrl($taskId)['data']['filePath'];
 
         $this->assertEquals(true, empty($libre->deleteFile($convertedUrl)['errors']));
     }
@@ -34,11 +34,11 @@ class PhpLibreTest extends TestCase {
 
         $taskId = $libre->convertFile($options)['data']['taskId'];
 
-        while (!$libre->isReady($taskId)['data']['status']) {
+        while (!$libre->isReady($taskId)) {
             print("Waiting on file to finish converting");
         }
 
-        $convertedUrl = $libre->getFileUrl($taskId)['data']['filepath'];
+        $convertedUrl = $libre->getFileUrl($taskId)['data']['filePath'];
 
         $this->assertEquals(true, empty($libre->deleteFile($convertedUrl)['errors']));
     }
@@ -47,7 +47,7 @@ class PhpLibreTest extends TestCase {
         $libre = new PhpLibre();
         $taskId = 'fakeTaskId';
 
-        $this->assertEquals(false, $libre->isReady($taskId)['data']['status']);
+        $this->assertEquals(false, $libre->isReady($taskId));
     }
 
     public function testCheckGetFileUrlFalse() {
