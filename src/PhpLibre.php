@@ -19,7 +19,13 @@ class PhpLibre
         'doc' => [
             'html' => 'html:HTML:EmbedImages'
         ],
+        'DOC' => [
+            'html' => 'html:HTML:EmbedImages'
+        ],
         'docx' => [
+            'html' => 'html:HTML:EmbedImages'
+        ],
+        'DOCX' => [
             'html' => 'html:HTML:EmbedImages'
         ],
         'pdf' => [
