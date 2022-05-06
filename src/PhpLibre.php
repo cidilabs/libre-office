@@ -80,8 +80,7 @@ class PhpLibre
 
         $DS = DIRECTORY_SEPARATOR;
         $outdir = $this->outputDir;
-        $fileName = pathinfo($fileName, PATHINFO_FILENAME);
-        $fileName = $this->clean($fileName);
+        $fileName = $this->clean(pathinfo($fileName, PATHINFO_FILENAME));
         $tmpName = $fileName . '.' . $format;
 
         rename($outdir . $DS . $tmpName, $outdir . $DS . $newFilename);
