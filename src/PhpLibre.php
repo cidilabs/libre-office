@@ -30,15 +30,10 @@ class PhpLibre
         'errors' => []
     ];
 
-    public function __construct($bin = 'soffice', $outputDir = 'files/alternates')
+    public function __construct($bin = 'soffice', $outputDir = 'alternates')
     {
         $this->bin = $bin;
         $this->outputDir = $outputDir;
-    }
-
-    public function clean($string) {
-       $string = str_replace(' ', '-', $string);
-       return preg_replace('/[^A-Za-z0-9\-]/', '', $string);
     }
 
     public function convertFile($options)
@@ -80,7 +75,7 @@ class PhpLibre
 
         $DS = DIRECTORY_SEPARATOR;
         $outdir = $this->outputDir;
-        $fileName = $this->clean(pathinfo($fileName, PATHINFO_FILENAME));
+        $fileName = pathinfo($fileName, PATHINFO_FILENAME);
         $tmpName = $fileName . '.' . $format;
 
         rename($outdir . $DS . $tmpName, $outdir . $DS . $newFilename);
