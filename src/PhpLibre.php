@@ -36,6 +36,14 @@ class PhpLibre
         $this->outputDir = $outputDir;
     }
 
+    public function supports()
+    {
+        return [
+            'input' => ['pdf', 'doc'],
+            'output' => ['html']
+        ];
+    }
+
     public function convertFile($options)
     {
         $fileUrl = $options['fileUrl'];
@@ -75,8 +83,7 @@ class PhpLibre
 
         $DS = DIRECTORY_SEPARATOR;
         $outdir = $this->outputDir;
-        $fileName = pathinfo($fileName, PATHINFO_FILENAME);
-        $tmpName = $fileName . '.' . $format;
+        $tmpName = pathinfo($fileName, PATHINFO_FILENAME) . '.' . $format;
 
         rename($outdir . $DS . $tmpName, $outdir . $DS . $newFilename);
 
@@ -92,9 +99,11 @@ class PhpLibre
         return !empty($result);
     }
 
-    public function getFileUrl($taskId)
+    public function getFileUrl($taskId, $options = [])
     {
         $result = glob($this->outputDir . '/' . $taskId . '.*');
+
+        // TODO: handle related files as well
 
         if (!empty($result)) {
             $this->responseObject['data']['filePath'] = $result[0];
