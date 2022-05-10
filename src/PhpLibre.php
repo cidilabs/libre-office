@@ -15,8 +15,25 @@ class PhpLibre
 
     // extensions and filters for LibreOffice
     // https://help.libreoffice.org/latest/en-US/text/shared/guide/convertfilters.html
-    private $extensionFilters = [
-        'html' => "html:XHTML Writer File",
+    private $exportFilters = [
+        'doc' => [
+            'html' => 'html:HTML:EmbedImages'
+        ],
+        'DOC' => [
+            'html' => 'html:HTML:EmbedImages'
+        ],
+        'docx' => [
+            'html' => 'html:HTML:EmbedImages'
+        ],
+        'DOCX' => [
+            'html' => 'html:HTML:EmbedImages'
+        ],
+        'pdf' => [
+            'html' => 'html:XHTML Impress File'
+        ]
+    ];
+    private $infilterOptions = [
+        'pdf' => 'impress_pdf_import',
     ];
 
     // Response object that gets returned to Udoit
@@ -75,7 +92,8 @@ class PhpLibre
             mkdir($this->outputDir, 0777, true);
         }
 
-        $shell = $this->exec($this->makeCommand($format, $fileName));
+        $shell = $this->exec($this->makeCommand($extension, $format, $fileName));
+
         if (0 != $shell['return']) {
             $this->responseObject['errors'][] = "Conversion Failure! Contact your institution's UDOIT admin. Error: " . $shell['return'];
             return $this->responseObject;
@@ -86,7 +104,7 @@ class PhpLibre
         $tmpName = pathinfo($fileName, PATHINFO_FILENAME) . '.' . $format;
 
         rename($outdir . $DS . $tmpName, $outdir . $DS . $newFilename);
-
+        
         $this->responseObject['data']['taskId'] = $taskId;
 
         return $this->responseObject;
@@ -129,15 +147,19 @@ class PhpLibre
      * Helpers
      **/
 
-
-    protected function makeCommand($outputExtension, $filename)
+    protected function makeCommand($inputExtension, $outputExtension, $filename)
     {
         $oriFile = escapeshellarg($filename);
         $dirname = $this->outputDir;
 
-        $outputExtension = !empty($this->extensionFilters[$outputExtension]) ? $this->extensionFilters[$outputExtension] : $outputExtension;
-
-        return "{$this->bin} --headless --convert-to \"{$outputExtension}\" {$oriFile} --outdir {$dirname}";
+        //Finds an output filter that corresponds to the input and output types
+        $outputExtension = !empty($this->exportFilters[$inputExtension][$outputExtension]) ? $this->exportFilters[$inputExtension][$outputExtension] : $outputExtension;
+        
+        //Determines the infilter based on the input type
+        $infilterArg = !empty($this->infilterOptions[$inputExtension]) ? $this->infilterOptions[$inputExtension] : '';
+        $infilter = "--infilter=\"" . $infilterArg . "\" ";
+        
+        return "{$this->bin} --headless " . $infilter . "--convert-to \"{$outputExtension}\" {$oriFile} --outdir {$dirname}";
     }
 
     protected function open($filename)
@@ -149,7 +171,6 @@ class PhpLibre
 
         return true;
     }
-
 
     private function getAllowedConverter($extension = null)
     {
@@ -234,7 +255,6 @@ class PhpLibre
     private function exec($cmd, $input = '')
     {
         $process = proc_open($cmd, [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
-
         if (false === $process) {
             print('Cannot obtain ressource for process to convert file');
         }
