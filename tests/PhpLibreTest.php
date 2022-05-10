@@ -44,6 +44,22 @@ class PhpLibreTest extends TestCase {
 
         $this->assertEquals(true, empty($libre->deleteFile($convertedUrl)['errors']));
     }
+    public function testConversion3() {
+        $libre = new PhpLibre();
+        $fileUrl = "test.pdf";
+        $options = array('fileUrl' => $fileUrl, 'fileType' => 'pdf', 'format' => 'html', 'fileName' => 'test.pdf');
+
+        $return = $libre->convertFile($options);
+        $taskId = $return['data']['taskId'];
+
+        while (!$libre->isReady($taskId)) {
+            print("Waiting on file to finish converting");
+        }
+
+        $convertedUrl = $libre->getFileUrl($taskId)['data']['filePath'];
+        print($convertedUrl);
+        $this->assertEquals(true, file_exists($convertedUrl));
+    }
 
     public function testCheckIsReadyTrue() {
         $libre = new PhpLibre();

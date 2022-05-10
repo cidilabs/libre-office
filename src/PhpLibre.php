@@ -53,6 +53,14 @@ class PhpLibre
         $this->outputDir = $outputDir;
     }
 
+    public function supports()
+    {
+        return [
+            'input' => ['pdf', 'doc'],
+            'output' => ['html']
+        ];
+    }
+
     public function convertFile($options)
     {
         $fileUrl = $options['fileUrl'];
@@ -85,7 +93,7 @@ class PhpLibre
         }
 
         $shell = $this->exec($this->makeCommand($extension, $format, $fileName));
-        
+
         if (0 != $shell['return']) {
             $this->responseObject['errors'][] = "Conversion Failure! Contact your institution's UDOIT admin. Error: " . $shell['return'];
             return $this->responseObject;
@@ -96,7 +104,7 @@ class PhpLibre
         $tmpName = pathinfo($fileName, PATHINFO_FILENAME) . '.' . $format;
 
         rename($outdir . $DS . $tmpName, $outdir . $DS . $newFilename);
-
+        
         $this->responseObject['data']['taskId'] = $taskId;
 
         return $this->responseObject;
