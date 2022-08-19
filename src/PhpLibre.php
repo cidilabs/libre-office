@@ -107,10 +107,38 @@ class PhpLibre
         $tmpName = pathinfo($fileName, PATHINFO_FILENAME) . '.' . $format;
 
         rename($outdir . $DS . $tmpName, $outdir . $DS . $newFilename);
-        
+
         $this->responseObject['data']['taskId'] = $taskId;
 
         return $this->responseObject;
+    }
+
+    public function convertToHtml($filepath)
+    {
+        $extension = pathinfo($filepath, PATHINFO_EXTENSION);
+
+        //Check for valid input file extension
+        if (!array_key_exists($extension, $this->getAllowedConverter())) {
+            throw new \Exception("Input file extension not supported -- " . $extension);
+        }
+
+        if (!is_dir($this->outputDir)) {
+            mkdir($this->outputDir, 0777, true);
+        }
+
+        $shell = $this->exec($this->makeCommand($extension, 'html', $filepath));
+
+        if (0 != $shell['return']) {
+            throw new \Exception("Conversion Failure! Contact your institution's UDOIT admin. Error: " . $shell['return']);
+        }
+
+        $htmlFilepath = str_replace($extension, 'html', $filepath);
+
+        $out = file_get_contents($htmlFilepath);
+
+        unlink($htmlFilepath);
+
+        return $out;
     }
 
     public function isReady($taskId)
@@ -157,11 +185,11 @@ class PhpLibre
 
         //Finds an output filter that corresponds to the input and output types
         $outputExtension = !empty($this->exportFilters[$inputExtension][$outputExtension]) ? $this->exportFilters[$inputExtension][$outputExtension] : $outputExtension;
-        
+
         //Determines the infilter based on the input type
         $infilterArg = !empty($this->infilterOptions[$inputExtension]) ? $this->infilterOptions[$inputExtension] : '';
         $infilter = "--infilter=\"" . $infilterArg . "\" ";
-        
+
         return "{$this->bin} --headless " . $infilter . "--convert-to \"{$outputExtension}\" {$oriFile} --outdir {$dirname}";
     }
 
