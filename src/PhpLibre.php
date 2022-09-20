@@ -134,6 +134,10 @@ class PhpLibre
 
         $htmlFilepath = str_replace($extension, 'html', $filepath);
 
+        if (!file_exists($htmlFilepath)) {
+            return null;
+        }
+
         $out = file_get_contents($htmlFilepath);
 
         unlink($htmlFilepath);
