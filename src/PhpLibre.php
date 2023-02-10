@@ -50,10 +50,14 @@ class PhpLibre
         'errors' => []
     ];
 
+    private $sOfficePort = null;
+    private $tempDir;
+
     public function __construct($bin = 'soffice', $outputDir = 'alternates')
     {
         $this->bin = $bin;
         $this->outputDir = $outputDir;
+        $this->tempDir = sys_get_temp_dir();
     }
 
     public function supports()
@@ -129,7 +133,7 @@ class PhpLibre
         $shell = $this->exec($this->makeCommand($extension, 'html', $filepath));
 
         if (0 != $shell['return']) {
-            throw new \Exception("Conversion Failure! Contact your institution's UDOIT admin. Error: " . $shell['return']);
+            throw new \Exception("Conversion Failure! Contact your institution's UDOIT admin. Error: " . $shell['return'] . ": output :" . $shell['stdout']. ": error :" . $shell['stderr']);
         }
 
         $htmlFilepath = str_replace($extension, 'html', $filepath);
@@ -194,7 +198,14 @@ class PhpLibre
         $infilterArg = !empty($this->infilterOptions[$inputExtension]) ? $this->infilterOptions[$inputExtension] : '';
         $infilter = "--infilter=\"" . $infilterArg . "\" ";
 
-        return "{$this->bin} --headless " . $infilter . "--convert-to \"{$outputExtension}\" {$oriFile} --outdir {$dirname}";
+        while (is_null($this->sOfficePort)){
+            $tmpPort = rand(8100,8999);
+            if (!is_dir("{$this->tempDir}/SOffice_Process{$this->sOfficePort}")) {
+                $this->sOfficePort = $tmpPort;
+            }
+        }
+
+        return "{$this->bin} --headless --headless --norestore --nolockcheck  -env:SingleAppInstance=\"false\" -env:UserInstallation=\"file:///{$this->tempDir}/SOffice_Process{$this->sOfficePort}\" --accept=\"socket,host=localhost,port={$this->sOfficePort};urp;\"  " . $infilter . "--convert-to \"{$outputExtension}\" {$oriFile} --outdir {$dirname}";
     }
 
     protected function open($filename)
@@ -302,10 +313,35 @@ class PhpLibre
         fclose($pipes[2]);
         $rtn = proc_close($process);
 
+        $this->deleteDirectory("{$this->tempDir}/SOffice_Process{$this->sOfficePort}");
+
         return [
             'stdout' => $stdout,
             'stderr' => $stderr,
             'return' => $rtn,
         ];
+    }
+
+    private function deleteDirectory($dir) {
+        if (!file_exists($dir)) {
+            return true;
+        }
+    
+        if (!is_dir($dir)) {
+            return unlink($dir);
+        }
+    
+        foreach (scandir($dir) as $item) {
+            if ($item == '.' || $item == '..') {
+                continue;
+            }
+    
+            if (!$this->deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
+                return false;
+            }
+    
+        }
+    
+        return rmdir($dir);
     }
 }
